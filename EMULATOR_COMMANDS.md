@@ -1,6 +1,7 @@
 # 🚀 Quick Commands - Run di Emulator
 
 ## Status Saat Ini
+
 ✅ **Emulator**: Pixel 5 API 30 (emulator-5554) - RUNNING  
 ✅ **App**: Sedang build dan install ke emulator  
 ✅ **Mode**: Debug mode (hot reload enabled)
@@ -8,10 +9,11 @@
 ## 🎮 Controls Saat App Running
 
 ### Hot Reload & Development
+
 ```bash
 # Dalam terminal yang sedang running:
 r         # Hot reload - apply code changes tanpa restart
-R         # Hot restart - restart app completely  
+R         # Hot restart - restart app completely
 p         # Show performance overlay
 o         # Toggle platform (Android/iOS rendering)
 q         # Quit app dan stop running
@@ -19,6 +21,7 @@ h         # Show all commands
 ```
 
 ### Flutter Inspector & Debug
+
 ```bash
 # Dalam terminal:
 i         # Open Flutter Inspector (widget tree)
@@ -32,20 +35,24 @@ t         # Dump render tree to console
 
 Setelah app terbuka di emulator:
 
-1. **✓ Launch Test**: 
+1. **✓ Launch Test**:
+
    - App icon muncul di home screen
-   - Splash screen tampil 
+   - Splash screen tampil
    - Main screen terbuka tanpa crash
 
 2. **✓ Navigation Test**:
+
    - Bottom navigation (Al-Qur'an, Hadist, Riwayat, Settings)
    - Tap each tab - semua berfungsi
 
 3. **✓ Permission Test**:
+
    - Location permission popup muncul
    - Accept atau decline permission
 
-4. **✓ Content Test**: 
+4. **✓ Content Test**:
+
    - Al-Qur'an: Daftar surah muncul
    - Tap surah: Detail buka dengan teks Arab
    - Header bersih tanpa background shapes ✨
@@ -76,6 +83,7 @@ adb -s emulator-5554 install build\app\outputs\flutter-apk\app-release.apk
 ## 🛠️ Troubleshooting Emulator
 
 ### App Tidak Install
+
 ```bash
 # Check adb connection
 adb devices
@@ -91,6 +99,7 @@ flutter run -d emulator-5554
 ```
 
 ### Performance Issues
+
 ```bash
 # Enable software rendering jika lag
 flutter run -d emulator-5554 --enable-software-rendering
@@ -100,6 +109,7 @@ flutter run -d emulator-5554 --enable-software-rendering
 ```
 
 ### Permission Issues di Emulator
+
 ```bash
 # Manual grant permission via adb:
 adb -s emulator-5554 shell pm grant com.example.apps_kurir android.permission.ACCESS_FINE_LOCATION

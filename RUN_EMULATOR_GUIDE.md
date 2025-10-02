@@ -3,23 +3,26 @@
 ## 🔧 Persiapan Emulator
 
 ### 1. Install Android Studio
+
 ```bash
 # Download dari: https://developer.android.com/studio
 # Install dengan semua komponen default
 ```
 
 ### 2. Setup Android SDK & Tools
+
 ```bash
 # Buka Android Studio > More Actions > SDK Manager
 # Install:
 ✓ Android SDK Platform (API 33, 31, 30)
-✓ Android SDK Build-Tools  
+✓ Android SDK Build-Tools
 ✓ Android Emulator
 ✓ Android SDK Platform-Tools
 ✓ Intel x86 Emulator Accelerator (HAXM) atau AMD Processor
 ```
 
 ### 3. Buat AVD (Android Virtual Device)
+
 ```bash
 # Android Studio > More Actions > AVD Manager > Create Virtual Device
 # Pilih:
@@ -32,6 +35,7 @@
 ## 🚀 Cara Run di Emulator
 
 ### Method 1: Dari VS Code
+
 ```bash
 # 1. Buka terminal di VS Code
 cd c:\laragon\www\apps_kurir
@@ -51,6 +55,7 @@ flutter run --release
 ```
 
 ### Method 2: Dari Command Line
+
 ```powershell
 # 1. Start emulator manual
 # Buka Android Studio > AVD Manager > Play button
@@ -69,6 +74,7 @@ flutter run
 ```
 
 ### Method 3: Direct Install APK
+
 ```bash
 # 1. Start emulator
 # 2. Install APK ke emulator
@@ -80,6 +86,7 @@ adb install build\app\outputs\flutter-apk\app-release.apk
 ## 🛠️ Troubleshooting Emulator
 
 ### Emulator Tidak Muncul
+
 ```bash
 # Cek emulator list
 flutter emulators
@@ -93,6 +100,7 @@ echo $ANDROID_HOME
 ```
 
 ### Performance Issues
+
 ```bash
 # Enable hardware acceleration:
 # 1. Enable Hyper-V (Windows)
@@ -104,11 +112,12 @@ echo $ANDROID_HOME
 ```
 
 ### Emulator Commands
+
 ```bash
 # List available emulators
 flutter emulators
 
-# Launch specific emulator  
+# Launch specific emulator
 flutter emulators --launch Pixel_4_API_30
 
 # Kill all emulators
@@ -138,19 +147,19 @@ flutter emulators --launch Pixel_4_API_30
 flutter run
 
 # Hot reload: tekan 'r' di terminal
-# Hot restart: tekan 'R' di terminal  
+# Hot restart: tekan 'R' di terminal
 # Quit: tekan 'q' di terminal
 ```
 
 ## 📱 Recommended Emulator Settings
 
-| Setting | Value | Reason |
-|---------|-------|---------|
-| **Device** | Pixel 4/6 | Standard Android |
-| **API Level** | 30-33 | Target compatibility |
-| **RAM** | 2048-4096MB | Smooth performance |
-| **Storage** | 6GB+ | App + cache space |
-| **Graphics** | Hardware GLES 2.0 | Kompas sensor simulation |
+| Setting       | Value             | Reason                   |
+| ------------- | ----------------- | ------------------------ |
+| **Device**    | Pixel 4/6         | Standard Android         |
+| **API Level** | 30-33             | Target compatibility     |
+| **RAM**       | 2048-4096MB       | Smooth performance       |
+| **Storage**   | 6GB+              | App + cache space        |
+| **Graphics**  | Hardware GLES 2.0 | Kompas sensor simulation |
 
 ## 🔍 Debug di Emulator
 
@@ -171,7 +180,7 @@ adb install build\app\outputs\flutter-apk\app-debug.apk
 Setelah run di emulator, test:
 
 1. **Launch** ✓ - App buka tanpa crash
-2. **Navigation** ✓ - Bottom tabs berfungsi  
+2. **Navigation** ✓ - Bottom tabs berfungsi
 3. **Al-Qur'an** ✓ - Surah list dan detail
 4. **Kiblat** ✓ - Kompas (simulasi di emulator)
 5. **Permission** ✓ - Location popup muncul
@@ -181,12 +190,12 @@ Setelah run di emulator, test:
 
 ## 🚨 Common Issues
 
-| Error | Solution |
-|-------|----------|
-| `No devices found` | Start emulator first |
-| `adb not found` | Add Android SDK to PATH |
-| `Emulator slow` | Enable hardware acceleration |
-| `Build failed` | Run `flutter clean` first |
+| Error               | Solution                            |
+| ------------------- | ----------------------------------- |
+| `No devices found`  | Start emulator first                |
+| `adb not found`     | Add Android SDK to PATH             |
+| `Emulator slow`     | Enable hardware acceleration        |
+| `Build failed`      | Run `flutter clean` first           |
 | `Permission denied` | Grant location in emulator settings |
 
 **Sekarang coba jalankan dengan:** `flutter run` setelah emulator sudah menyala! 🚀
