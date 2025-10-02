@@ -8,7 +8,7 @@
 
 **Aplikasi Al-Qur'an Digital yang komprehensif dengan fitur lengkap untuk membaca, mempelajari, dan mengamalkan kitab suci**
 
-[📱 Download APK](#-download) • [🚀 Getting Started](#-getting-started) • [📖 Documentation](#-documentation) • [🤝 Contributing](#-contributing)
+[📱 Download APK](https://drive.google.com/file/d/1pZATImaulrlrlrGC9MMqYXQvfX1R6YmW/view) • [🚀 Getting Started](#-getting-started) • [📖 Documentation](#-documentation) • [🤝 Contributing](#-contributing)
 
 </div>
 
@@ -92,24 +92,6 @@ lib/
 
 ---
 
-## 🎯 Screenshots
-
-<div align="center">
-
-### Home Screen & Navigation
-
-|           Al-Qur'an Home           |              Surah Detail              |                 Kiblat                 |
-| :--------------------------------: | :------------------------------------: | :------------------------------------: |
-| ![Home](docs/screenshots/home.png) | ![Detail](docs/screenshots/detail.png) | ![Kiblat](docs/screenshots/kiblat.png) |
-
-### Features Overview
-
-|                 Hadist                 |            Doa Harian            |                  Settings                  |
-| :------------------------------------: | :------------------------------: | :----------------------------------------: |
-| ![Hadist](docs/screenshots/hadist.png) | ![Doa](docs/screenshots/doa.png) | ![Settings](docs/screenshots/settings.png) |
-
-</div>
-
 ---
 
 ## 🚀 Getting Started
@@ -174,7 +156,7 @@ flutter build apk --split-per-abi
 - **Min Android**: 5.0 (API 21)
 - **Target Android**: 13 (API 33)
 
-📦 [**Download APK**](https://github.com/divadestiarohyadi/Aplikasi_AlquranDigital/releases)
+📦 [**Download APK**](https://drive.google.com/file/d/1pZATImaulrlrlrGC9MMqYXQvfX1R6YmW/view)
 
 ### Installation Guide
 
@@ -230,9 +212,9 @@ dart format .
 
 ### Al-Qur'an API
 
-- **Primary**: [Quran API](https://api.quran.com)
+- **Primary**: [Quran API](https://quran-api.santrikoding.com/)
 - **Fallback**: Local JSON data
-- **Features**: Arab text, translations, audio
+- **Features**: Arab text, translations
 
 ### Hadist API
 
@@ -336,34 +318,6 @@ FontSize: 14-18px
 
 ---
 
-## 🚨 Troubleshooting
-
-### Common Issues
-
-| Issue                        | Solution                                        |
-| ---------------------------- | ----------------------------------------------- |
-| **APK tidak bisa dibuka**    | Uninstall versi lama, restart HP, install ulang |
-| **GPS tidak akurat**         | Enable high accuracy di location settings       |
-| **Kompas tidak bergerak**    | Kalibrasi sensor (gerakkan figure-8)            |
-| **Notifikasi tidak muncul**  | Grant notification permission di settings       |
-| **Font terlalu kecil/besar** | Settings > Font Size > Adjust                   |
-
-### Debug Steps
-
-1. Check `flutter doctor`
-2. Run `flutter analyze`
-3. Enable USB debugging
-4. Check `adb logcat`
-5. Try debug APK
-
-### Performance Tips
-
-- **Clear cache** regular di Android settings
-- **Close background apps** saat running
-- **Enable hardware acceleration** di developer options
-- **Use release APK** untuk performance optimal
-
----
 
 ## 🗺️ Roadmap
 
@@ -481,7 +435,7 @@ _Lead Developer & Designer_
 
 ## 🙏 Acknowledgments
 
-- **Al-Qur'an API** - Quran.com untuk data surah
+- **Al-Qur'an API** - quran-api.santrikoding.com untuk data surah
 - **Hadith API** - Gading.dev untuk hadist collection
 - **Aladhan API** - Prayer times calculation
 - **Flutter Community** - Amazing framework dan plugins
