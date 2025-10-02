@@ -1,0 +1,657 @@
+import 'package:flutter/material.dart';
+import '../models/quran_data.dart';
+import '../models/api_models.dart';
+import '../services/quran_api_service.dart';
+import '../services/location_service.dart';
+import '../services/prayer_times_service.dart';
+import '../services/notification_service.dart';
+import '../widgets/surah_card.dart';
+import '../widgets/api_surah_card.dart';
+import 'prayer_times_screen.dart';
+import 'tasbih_screen.dart';
+import 'kiblat_screen.dart';
+import 'doa_harian_screen.dart';
+import 'asmaul_husna_screen.dart';
+import 'api_surah_list_screen.dart';
+
+class QuranHomeScreen extends StatefulWidget {
+  const QuranHomeScreen({super.key});
+
+  @override
+  State<QuranHomeScreen> createState() => _QuranHomeScreenState();
+}
+
+class _QuranHomeScreenState extends State<QuranHomeScreen> {
+  final TextEditingController _searchController = TextEditingController();
+  String _searchQuery = '';
+  List<ApiSurah> apiSurahs = [];
+  List<ApiSurah> filteredApiSurahs = [];
+  bool isLoadingApi = true;
+  bool useApi = true; // Toggle untuk menggunakan API atau data static
+
+  // Prayer times data
+  Map<String, String> prayerTimes = {};
+  String currentPrayer = '';
+  String nextPrayer = '';
+  String locationName = '';
+  bool isLoadingPrayer = true;
+
+  @override
+  void initState() {
+    super.initState();
+    if (useApi) {
+      _loadApiSurahs();
+    }
+    _initializeNotifications();
+    _loadPrayerTimes();
+  }
+
+  Future<void> _initializeNotifications() async {
+    await NotificationService.initialize();
+    await NotificationService.requestPermissions();
+  }
+
+  Future<void> _loadPrayerTimes() async {
+    try {
+      setState(() {
+        isLoadingPrayer = true;
+      });
+
+      // Get current location
+      final locationData = await LocationService.getCurrentLocation();
+
+      if (locationData != null) {
+        final latitude = locationData['latitude']!;
+        final longitude = locationData['longitude']!;
+
+        // Get location name
+        final location =
+            await LocationService.getShortLocationName(latitude, longitude);
+
+        // Get prayer times from API
+        final prayerData = await PrayerTimesService.getPrayerTimes(
+          latitude: latitude,
+          longitude: longitude,
+        );
+
+        if (prayerData != null) {
+          final times = PrayerTimesService.formatPrayerTimes(prayerData);
+          final current = PrayerTimesService.getCurrentPrayer(times);
+          final next = PrayerTimesService.getNextPrayer(times);
+
+          setState(() {
+            prayerTimes = times;
+            currentPrayer = current;
+            nextPrayer = next;
+            locationName = location;
+            isLoadingPrayer = false;
+          });
+
+          // Schedule prayer notifications
+          await NotificationService.schedulePrayerNotifications(times);
+        } else {
+          setState(() {
+            isLoadingPrayer = false;
+          });
+        }
+      } else {
+        setState(() {
+          isLoadingPrayer = false;
+        });
+      }
+    } catch (e) {
+      setState(() {
+        isLoadingPrayer = false;
+      });
+    }
+  }
+
+  Future<void> _loadApiSurahs() async {
+    try {
+      setState(() {
+        isLoadingApi = true;
+      });
+
+      final surahs = await QuranApiService.getAllSurahs();
+
+      setState(() {
+        apiSurahs = surahs;
+        filteredApiSurahs = surahs;
+        isLoadingApi = false;
+      });
+    } catch (e) {
+      setState(() {
+        useApi = false; // Fallback ke data static jika API gagal
+        isLoadingApi = false;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.grey[50],
+      body: CustomScrollView(
+        slivers: [
+          SliverAppBar(
+            expandedHeight: 300,
+            floating: false,
+            pinned: true,
+            backgroundColor: const Color(0xFF2E7D32),
+            flexibleSpace: FlexibleSpaceBar(
+              background: Container(
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Color(0xFF1B5E20),
+                      Color(0xFF2E7D32),
+                      Color(0xFF4CAF50),
+                    ],
+                  ),
+                ),
+                child: SafeArea(
+                  child: Padding(
+                    padding: const EdgeInsets.all(20),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        // App Title with Islamic styling
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 24, vertical: 12),
+                          decoration: BoxDecoration(
+                            color: Colors.black.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(25),
+                          ),
+                          child: const Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.menu_book,
+                                  color: Colors.white, size: 28),
+                              SizedBox(width: 12),
+                              Text(
+                                'القرآن الكريم',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+
+                        // Current Prayer Time Widget
+                        _buildCurrentPrayerWidget(),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              title: const Text(
+                'القرآن الكريم',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 18,
+                ),
+              ),
+            ),
+          ),
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Search Bar
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.grey.withOpacity(0.1),
+                          spreadRadius: 1,
+                          blurRadius: 10,
+                          offset: const Offset(0, 1),
+                        ),
+                      ],
+                    ),
+                    child: TextField(
+                      controller: _searchController,
+                      onChanged: (value) {
+                        setState(() {
+                          _searchQuery = value;
+                        });
+                      },
+                      decoration: const InputDecoration(
+                        hintText: 'Cari surah...',
+                        border: InputBorder.none,
+                        enabledBorder: InputBorder.none,
+                        focusedBorder: InputBorder.none,
+                        errorBorder: InputBorder.none,
+                        disabledBorder: InputBorder.none,
+                        icon: Icon(Icons.search, color: Color(0xFF2E7D32)),
+                      ),
+                      autocorrect: false,
+                      enableSuggestions: false,
+                      enableInteractiveSelection: true,
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+
+                  // Quick Actions
+                  const Text(
+                    'Fitur Islami',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF2E7D32),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+
+                  SizedBox(
+                    height: 100,
+                    child: ListView(
+                      scrollDirection: Axis.horizontal,
+                      children: [
+                        _buildQuickActionCard(
+                          'Jadwal\nShalat',
+                          Icons.access_time,
+                          Colors.blue,
+                          () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const PrayerTimesScreen(),
+                            ),
+                          ),
+                        ),
+                        _buildQuickActionCard(
+                          'Tasbih\nDigital',
+                          Icons.favorite,
+                          Colors.red,
+                          () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const TasbihScreen(),
+                            ),
+                          ),
+                        ),
+                        _buildQuickActionCard(
+                          'Arah\nKiblat',
+                          Icons.navigation,
+                          Colors.green,
+                          () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const KiblatScreen(),
+                            ),
+                          ),
+                        ),
+                        _buildQuickActionCard(
+                          'Doa\nHarian',
+                          Icons.book,
+                          Colors.orange,
+                          () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const DoaHarianScreen(),
+                            ),
+                          ),
+                        ),
+                        _buildQuickActionCard(
+                          'Asmaul\nHusna',
+                          Icons.star,
+                          Colors.purple,
+                          () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const AsmaulHusnaScreen(),
+                            ),
+                          ),
+                        ),
+                        _buildQuickActionCard(
+                          'Daftar\nSurah',
+                          Icons.list_alt,
+                          Colors.teal,
+                          () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const ApiSurahListScreen(),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+
+                  // Stats
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _buildStatCard(
+                          'Surah',
+                          '114',
+                          Icons.bookmark,
+                          Colors.blue,
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: _buildStatCard(
+                          'Ayat',
+                          '6,236',
+                          Icons.format_list_numbered,
+                          Colors.green,
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: _buildStatCard(
+                          'Juz',
+                          '30',
+                          Icons.menu_book,
+                          Colors.orange,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          // Content
+          if (useApi && isLoadingApi)
+            const SliverToBoxAdapter(
+              child: Center(
+                child: Padding(
+                  padding: EdgeInsets.all(32.0),
+                  child: Column(
+                    children: [
+                      CircularProgressIndicator(
+                        color: Color(0xFF2E7D32),
+                      ),
+                      SizedBox(height: 16),
+                      Text(
+                        'Memuat daftar surah...',
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: Colors.grey,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            )
+          else if (useApi)
+            SliverList(
+              delegate: SliverChildBuilderDelegate(
+                (context, index) {
+                  final filtered = apiSurahs.where((surah) {
+                    return surah.namaLatin
+                            .toLowerCase()
+                            .contains(_searchQuery.toLowerCase()) ||
+                        surah.nama.contains(_searchQuery) ||
+                        surah.arti
+                            .toLowerCase()
+                            .contains(_searchQuery.toLowerCase());
+                  }).toList();
+
+                  final surah = filtered[index];
+                  return ApiSurahCard(surah: surah);
+                },
+                childCount: apiSurahs.where((surah) {
+                  return surah.namaLatin
+                          .toLowerCase()
+                          .contains(_searchQuery.toLowerCase()) ||
+                      surah.nama.contains(_searchQuery) ||
+                      surah.arti
+                          .toLowerCase()
+                          .contains(_searchQuery.toLowerCase());
+                }).length,
+              ),
+            )
+          else
+            SliverList(
+              delegate: SliverChildBuilderDelegate(
+                (context, index) {
+                  final filtered = QuranData.getSurahs().where((surah) {
+                    return surah.name
+                            .toLowerCase()
+                            .contains(_searchQuery.toLowerCase()) ||
+                        surah.englishName
+                            .toLowerCase()
+                            .contains(_searchQuery.toLowerCase()) ||
+                        surah.englishNameTranslation
+                            .toLowerCase()
+                            .contains(_searchQuery.toLowerCase());
+                  }).toList();
+
+                  final surah = filtered[index];
+                  return SurahCard(surah: surah);
+                },
+                childCount: QuranData.getSurahs().where((surah) {
+                  return surah.name
+                          .toLowerCase()
+                          .contains(_searchQuery.toLowerCase()) ||
+                      surah.englishName
+                          .toLowerCase()
+                          .contains(_searchQuery.toLowerCase()) ||
+                      surah.englishNameTranslation
+                          .toLowerCase()
+                          .contains(_searchQuery.toLowerCase());
+                }).length,
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildQuickActionCard(
+      String title, IconData icon, Color color, VoidCallback onTap) {
+    return Padding(
+      padding: const EdgeInsets.only(right: 12),
+      child: Material(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(12),
+          child: Container(
+            width: 80,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.grey.withOpacity(0.1),
+                  spreadRadius: 1,
+                  blurRadius: 10,
+                  offset: const Offset(0, 1),
+                ),
+              ],
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(12),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    icon,
+                    color: color,
+                    size: 28,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    title,
+                    style: TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w600,
+                      color: color,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStatCard(
+      String title, String value, IconData icon, Color color) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.1),
+            spreadRadius: 1,
+            blurRadius: 10,
+            offset: const Offset(0, 1),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          Icon(
+            icon,
+            color: color,
+            size: 24,
+          ),
+          const SizedBox(height: 8),
+          Text(
+            value,
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: color,
+            ),
+          ),
+          Text(
+            title,
+            style: TextStyle(
+              fontSize: 10,
+              color: Colors.grey[600],
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCurrentPrayerWidget() {
+    if (isLoadingPrayer) {
+      return const Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          SizedBox(
+            width: 20,
+            height: 20,
+            child: CircularProgressIndicator(
+              color: Colors.white,
+              strokeWidth: 2,
+            ),
+          ),
+          SizedBox(width: 12),
+          Text(
+            'Memuat waktu sholat...',
+            style: TextStyle(
+              color: Colors.white70,
+              fontSize: 14,
+            ),
+          ),
+        ],
+      );
+    }
+
+    if (prayerTimes.isEmpty) {
+      return const Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.location_off, color: Colors.white70, size: 20),
+          SizedBox(width: 12),
+          Text(
+            'GPS tidak tersedia',
+            style: TextStyle(
+              color: Colors.white70,
+              fontSize: 14,
+            ),
+          ),
+        ],
+      );
+    }
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.access_time, color: Colors.white, size: 20),
+            const SizedBox(width: 8),
+            Text(
+              locationName.isNotEmpty ? locationName : 'Lokasi Saat Ini',
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              'Sekarang: $currentPrayer',
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            if (nextPrayer.isNotEmpty && prayerTimes[nextPrayer] != null) ...[
+              const Text(
+                ' | ',
+                style: TextStyle(
+                  color: Colors.white70,
+                  fontSize: 14,
+                ),
+              ),
+              Text(
+                'Berikutnya: $nextPrayer (${prayerTimes[nextPrayer]})',
+                style: const TextStyle(
+                  color: Colors.white70,
+                  fontSize: 14,
+                ),
+              ),
+            ],
+          ],
+        ),
+      ],
+    );
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+}
